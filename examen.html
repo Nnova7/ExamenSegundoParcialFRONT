@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen de Certificación JavaScript</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="index.html" class="nav-logo">JavaScript Cert</a>
+                <div class="nav-menu">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                    <a href="certificados.html" class="nav-link">Certificaciones</a>
+                    <span id="user-display" class="nav-user">Invitado</span>
+                    <button id="login-btn" class="btn-login">Iniciar Sesión</button>
+                    <button id="logout-btn" class="btn-logout" style="display: none;">Cerrar Sesión</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div id="exam-content" style="display: none;">
+            <h1>Examen de Certificación JavaScript</h1>
+            <div class="exam-info">
+                <p><strong>Duración:</strong> 3 horas</p>
+                <p><strong>Preguntas:</strong> 50</p>
+                <p><strong>Puntuación mínima:</strong> 70%</p>
+            </div>
+            
+            <div class="exam-questions">
+                <h2>Preguntas del Examen</h2>
+                <!-- Aquí van las preguntas del examen -->
+                <div class="question">
+                    <p>1. ¿Qué es JavaScript?</p>
+                    <input type="radio" name="q1" value="a"> a) Un lenguaje de programación<br>
+                    <input type="radio" name="q1" value="b"> b) Un framework de CSS<br>
+                    <input type="radio" name="q1" value="c"> c) Una base de datos<br>
+                </div>
+                
+                <div class="question">
+                    <p>2. ¿Cómo se declara una variable en JavaScript?</p>
+                    <input type="radio" name="q2" value="a"> a) var, let, const<br>
+                    <input type="radio" name="q2" value="b"> b) variable<br>
+                    <input type="radio" name="q2" value="c"> c) def<br>
+                </div>
+                
+                <!-- Agrega más preguntas según necesites -->
+            </div>
+            
+            <button onclick="submitExam()" class="btn-primary">Enviar Examen</button>
+        </div>
+        
+        <div id="access-denied" style="display: none; text-align: center; padding: 2rem;">
+            <h2>Acceso Denegado</h2>
+            <p>No tienes acceso a esta página. Debes iniciar el examen desde la página de certificaciones.</p>
+            <button onclick="goToCertifications()" class="btn-primary">Volver a Certificaciones</button>
+        </div>
+    </main>
+
+    <script>
+        // =====================================
+        // VERIFICACIÓN DE ACCESO AL EXAMEN
+        // =====================================
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("✅ Examen page loaded - Verifying access");
+            
+            const examContent = document.getElementById("exam-content");
+            const accessDenied = document.getElementById("access-denied");
+            const userDisplay = document.getElementById("user-display");
+            const loginBtn = document.getElementById("login-btn");
+            const logoutBtn = document.getElementById("logout-btn");
+
+            // Cargar estado de la sesión
+            const savedUser = localStorage.getItem("currentUser");
+            const savedPaymentStatus = localStorage.getItem("paymentStatus");
+            const savedExamTaken = localStorage.getItem("examTaken");
+
+            // Actualizar interfaz de usuario
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                userDisplay.textContent = user.cuenta;
+                loginBtn.style.display = "none";
+                logoutBtn.style.display = "inline-block";
+            }
+
+            // Verificar permisos para el examen
+            if (!savedUser) {
+                console.log("❌ No hay usuario logueado");
+                showAccessDenied();
+            } else if (savedPaymentStatus !== "true") {
+                console.log("❌ No hay pago realizado");
+                showAccessDenied();
+            } else if (savedExamTaken === "true") {
+                console.log("❌ Examen ya realizado");
+                showAccessDenied();
+            } else {
+                console.log("✅ Acceso permitido al examen");
+                examContent.style.display = "block";
+                accessDenied.style.display = "none";
+            }
+
+            // Configurar botón de logout
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", function() {
+                    localStorage.removeItem("currentUser");
+                    localStorage.removeItem("paymentStatus");
+                    localStorage.removeItem("examTaken");
+                    window.location.href = "certificados.html";
+                });
+            }
+        });
+
+        function showAccessDenied() {
+            document.getElementById("exam-content").style.display = "none";
+            document.getElementById("access-denied").style.display = "block";
+        }
+
+        function goToCertifications() {
+            window.location.href = "certificados.html";
+        }
+
+        function submitExam() {
+            // Simular envío de examen
+            const confirmacion = confirm("¿Estás seguro de que quieres enviar el examen?");
+            
+            if (confirmacion) {
+                // Marcar examen como realizado
+                localStorage.setItem("examTaken", "true");
+                
+                // Simular respuestas (en un caso real, recopilarías las respuestas del formulario)
+                const respuestas = {
+                    q1: document.querySelector('input[name="q1"]:checked')?.value || '',
+                    q2: document.querySelector('input[name="q2"]:checked')?.value || ''
+                };
+                
+                console.log("Respuestas del examen:", respuestas);
+                
+                // Mostrar mensaje de éxito
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: "Examen Enviado",
+                        text: "Tu examen ha sido enviado correctamente",
+                        icon: "success",
+                        confirmButtonText: "Aceptar"
+                    }).then(() => {
+                        window.location.href = "certificados.html";
+                    });
+                } else {
+                    alert("Examen enviado correctamente");
+                    window.location.href = "certificados.html";
+                }
+            }
+        }
+
+        // Función para mostrar alertas (compatible con SweetAlert2)
+        function showAlert(title, text, icon = "info") {
+            if (typeof Swal !== "undefined") {
+                Swal.fire({ title, text, icon, confirmButtonText: "Aceptar" });
+            } else {
+                alert(`${title}: ${text}`);
+            }
+        }
+    </script>
+</body>
+</html>
